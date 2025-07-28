@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verdent – Центр имплантации и протезирования в Фергане</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles and Tailwind Config -->
+    <style>
+        /* Конфигурация Tailwind */
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-green': '#1D3A34',
+                        'brand-gold': '#C9B89C',
+                        'brand-dark': '#1A1A1A',
+                        'brand-light-gray': '#F7F7F7',
+                        'brand-mint': '#6CFFD8',
+                    },
+                    fontFamily: {
+                        'heading': ['Playfair Display', 'serif'],
+                        'body': ['Manrope', 'sans-serif'],
+                    },
+                }
+            }
+        }
+
+        /* Анимация появления элементов */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Стили для аккордеонов */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-in-out, padding 0.7s ease-in-out;
+        }
+        
+        /* Универсальные стили для модальных окон */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(29, 58, 52, 0.8);
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1000; opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: white; padding: 2rem; border-radius: 1rem;
+            max-width: 500px; width: 90%;
+            transform: scale(0.95) translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
+        .modal-content-lg { max-width: 800px; }
+        
+        /* Кастомный селект */
+        .custom-select {
+            -webkit-appearance: none; -moz-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23C9B89C' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
+        }
+
+        /* Прелоадер для кнопок */
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #fff;
+            border-radius: 50%; width: 24px; height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        .loader.dark {
+            border-color: rgba(0, 0, 0, 0.2);
+            border-top-color: #1D3A34;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Уведомления (замена alert) */
+        #notification-container {
+            position: fixed; top: 20px; right: 20px; z-index: 2000;
+        }
+        .notification {
+            background-color: #c81e1e; color: white;
+            padding: 1rem 1.5rem; border-radius: 0.5rem;
+            margin-bottom: 1rem; font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            opacity: 0; transform: translateX(100%);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .notification.show { opacity: 1; transform: translateX(0); }
+        .notification.success { background-color: #1D3A34; }
+
+        /* --- ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ: Видимость текста в формах --- */
+        #telegram-form-section input,
+        #telegram-form-section textarea {
+            color: #1A1A1A; /* Цвет текста по умолчанию */
+            caret-color: #1A1A1A; /* Цвет курсора (каретки) */
+        }
+        #telegram-form-section input::placeholder,
+        #telegram-form-section textarea::placeholder {
+            color: #a0aec0; /* Tailwind gray-400 */
+        }
+
+        /* Этот блок исправляет стили АВТОЗАПОЛНЕНИЯ для браузеров WebKit (Chrome, Safari).
+           Браузеры часто принудительно ставят белый фон и черный текст, что ломает дизайн на темных фонах.
+           Этот код переопределяет это поведение. */
+        #telegram-form-section input:-webkit-autofill,
+        #telegram-form-section input:-webkit-autofill:hover,
+        #telegram-form-section input:-webkit-autofill:focus,
+        #telegram-form-section input:-webkit-autofill:active,
+        #telegram-form-section textarea:-webkit-autofill,
+        #telegram-form-section textarea:-webkit-autofill:hover,
+        #telegram-form-section textarea:-webkit-autofill:focus,
+        #telegram-form-section textarea:-webkit-autofill:active {
+            -webkit-text-fill-color: #FFFFFF !important; /* Устанавливаем белый цвет для текста */
+            box-shadow: 0 0 0px 1000px #2a4f47 inset !important; /* Задаем фон поля через тень, чтобы обойти стили браузера */
+            transition: background-color 5000s ease-in-out 0s; /* Предотвращаем смену фона */
+        }
+    </style>
+</head>
+<body class="bg-white text-brand-dark font-body antialiased">
+
+    <!-- Контейнер для уведомлений -->
+    <div id="notification-container"></div>
+
+    <!-- HEADER -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md transition-all duration-300">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#hero" class="text-3xl font-heading font-bold text-brand-green">Verdent</a>
+            <nav class="hidden lg:flex items-center space-x-8 text-sm font-medium">
+                <a href="#approach" class="hover:text-brand-gold transition-colors" data-lang-key="nav_approach">Подход</a>
+                <a href="#services" class="hover:text-brand-gold transition-colors" data-lang-key="nav_services">Услуги</a>
+                <a href="#team" class="hover:text-brand-gold transition-colors" data-lang-key="nav_doctors">Врачи</a>
+                <a href="#licenses" class="hover:text-brand-gold transition-colors" data-lang-key="nav_licenses">Лицензии</a>
+                <a href="#faq" class="hover:text-brand-gold transition-colors" data-lang-key="nav_faq">Вопросы</a>
+            </nav>
+            <div class="flex items-center gap-4">
+                <div id="lang-switcher" class="text-sm">
+                    <span class="font-bold cursor-pointer lang-btn" data-lang="ru">RU</span> | 
+                    <span class="text-gray-400 cursor-pointer lang-btn" data-lang="uz">UZ</span>
+                </div>
+              <a href="#contact" class="hidden md:inline-block bg-brand-green text-black font-bold py-3 px-6 rounded-full hover:bg-brand-dark hover:text-black transition-all duration-300 shadow-md hover:shadow-lg" data-lang-key="nav_appointment">Запись</a>
+                <button id="mobile-menu-button" class="lg:hidden text-brand-green">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden px-6 pb-4 space-y-2 bg-white">
+             <a href="#approach" class="block py-2 hover:text-brand-gold transition-colors" data-lang-key="nav_approach_mob">Подход</a>
+             <a href="#services" class="block py-2 hover:text-brand-gold transition-colors" data-lang-key="nav_services_mob">Услуги</a>
+             <a href="#team" class="block py-2 hover:text-brand-gold transition-colors" data-lang-key="nav_doctors_mob">Врачи</a>
+             <a href="#licenses" class="block py-2 hover:text-brand-gold transition-colors" data-lang-key="nav_licenses_mob">Лицензии</a>
+             <a href="#faq" class="block py-2 hover:text-brand-gold transition-colors" data-lang-key="nav_faq_mob">Вопросы</a>
+             <a href="#contact" class="mt-4 inline-block bg-brand-green text-white font-bold py-3 px-6 rounded-full hover:bg-brand-dark transition-colors w-full text-center" data-lang-key="nav_appointment_mob">Запись на прием</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- BLOCK 1: HERO -->
+        <section id="hero" class="relative min-h-[600px] lg:min-h-[700px] flex items-center justify-center text-white text-center overflow-hidden bg-brand-green">
+            <!-- Фоновое изображение -->
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://raw.githubusercontent.com/abdukhalilov13/verdent/main/images/ver2.png');"></div>
+            <!-- Улучшенная тень для контраста -->
+            <div class="absolute inset-0 bg-gradient-to-t from-brand-green/90 via-brand-green/50 to-black/30 z-10"></div>
+            <!-- Контент -->
+            <div class="relative z-20 px-6 reveal visible">
+                <h1 class="font-heading text-4xl md:text-7xl font-bold mb-4 drop-shadow-xl text-black" data-lang-key="hero_title">
+                    Естественность. Технологии. Улыбка.
+                </h1>
+            <p class="text-lg md:text-2xl max-w-3xl mx-auto mb-10 font-light drop-shadow-md text-black" data-lang-key="hero_subtitle">
+    Современная имплантация и протезирование в Фергане. Возвращаем то, что дано природой.
+</p>
+               <a href="#contact" class="bg-brand-gold text-black font-bold py-4 px-10 rounded-full text-lg hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105" data-lang-key="hero_button">Записаться на консультацию</a>
+            </div>
+        </section>
+
+        <!-- BLOCK 1.5: STATS -->
+        <section id="stats" class="bg-white">
+            <div class="container mx-auto px-6 py-20">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                    <div class="reveal">
+                        <p class="font-heading text-5xl lg:text-6xl font-bold text-brand-green" data-stat-target="15">0</p>
+                        <p class="text-gray-500 mt-2 text-sm" data-lang-key="stats_experience">Лет успешной практики</p>
+                    </div>
+                    <div class="reveal">
+                        <p class="font-heading text-5xl lg:text-6xl font-bold text-brand-green" data-stat-target="1200">0</p>
+                        <p class="text-gray-500 mt-2 text-sm" data-lang-key="stats_implants">Установленных имплантов</p>
+                    </div>
+                    <div class="reveal">
+                        <p class="font-heading text-5xl lg:text-6xl font-bold text-brand-green" data-stat-target="98">0</p>
+                        <p class="text-gray-500 mt-2 text-sm" data-lang-key="stats_success_rate">% Приживаемости</p>
+                    </div>
+                    <div class="reveal">
+                        <p class="font-heading text-5xl lg:text-6xl font-bold text-brand-green" data-stat-target="2000">0</p>
+                        <p class="text-gray-500 mt-2 text-sm" data-lang-key="stats_patients">Счастливых пациентов</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BLOCK 2: OUR APPROACH -->
+        <section id="approach" class="py-20 lg:py-32 bg-brand-light-gray overflow-hidden">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-20">
+                    <h2 class="font-heading text-4xl md:text-5xl font-bold text-brand-dark reveal" data-lang-key="approach_title">Наш подход – ваша уверенность</h2>
+                    <p class="text-lg text-gray-600 mt-4 max-w-2xl mx-auto reveal" data-lang-key="approach_subtitle">Мы превратили сложное лечение в понятный и предсказуемый процесс.</p>
+                </div>
+                <div class="grid md:grid-cols-4 gap-x-8 gap-y-16">
+                    <!-- Этапы подхода -->
+                    <div class="text-center relative reveal">
+                        <div class="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-2 border-brand-gold/20">
+                            <span class="font-heading text-3xl text-brand-gold">01</span>
+                        </div>
+                        <h3 class="font-heading text-xl font-bold mb-2" data-lang-key="approach_step1_title">Диагностика</h3>
+                        <p class="text-gray-600 text-sm" data-lang-key="approach_step1_desc">Точный 3D-снимок и цифровое сканирование для создания полной картины.</p>
+                    </div>
+                    <div class="text-center relative reveal">
+                        <div class="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-2 border-brand-gold/20">
+                            <span class="font-heading text-3xl text-brand-gold">02</span>
+                        </div>
+                        <h3 class="font-heading text-xl font-bold mb-2" data-lang-key="approach_step2_title">Планирование</h3>
+                        <p class="text-gray-600 text-sm" data-lang-key="approach_step2_desc">Моделируем вашу будущую улыбку в программе, чтобы вы увидели результат до начала лечения.</p>
+                    </div>
+                    <div class="text-center relative reveal">
+                        <div class="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-2 border-brand-gold/20">
+                            <span class="font-heading text-3xl text-brand-gold">03</span>
+                        </div>
+                        <h3 class="font-heading text-xl font-bold mb-2" data-lang-key="approach_step3_title">Лечение</h3>
+                        <p class="text-gray-600 text-sm" data-lang-key="approach_step3_desc">Бережная имплантация и протезирование по цифровому шаблону. Без боли и стресса.</p>
+                    </div>
+                    <div class="text-center relative reveal">
+                        <div class="bg-white w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg border-2 border-brand-gold/20">
+                            <span class="font-heading text-3xl text-brand-gold">04</span>
+                        </div>
+                        <h3 class="font-heading text-xl font-bold mb-2" data-lang-key="approach_step4_title">Результат</h3>
+                        <p class="text-gray-600 text-sm" data-lang-key="approach_step4_desc">Идеальная улыбка, которая выглядит и ощущается как ваша собственная. На всю жизнь.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BLOCK 3: SERVICES -->
+        <section id="services" class="py-20 lg:py-32 bg-white">
+             <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="font-heading text-4xl md:text-5xl font-bold text-brand-dark reveal" data-lang-key="services_title">Наши услуги</h2>
+                    <p class="text-lg text-gray-600 mt-4 max-w-2xl mx-auto reveal" data-lang-key="services_subtitle">Сосредоточены на том, что умеем делать лучше всего.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Услуга 1 -->
+                    <div class="accordion-item rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 reveal bg-white">
+                        <div class="h-64 bg-cover bg-center" style="background-image: url('https://github.com/abdukhalilov13/verdent/blob/main/vinir.png?raw=true')"></div>
+                        <div class="p-8">
+                            <h3 class="font-heading text-3xl font-bold text-brand-dark" data-lang-key="service1_title">Имплантация All-on-4/6</h3>
+                            <p class="text-gray-600 mt-2" data-lang-key="service1_subtitle">Восстановление всех зубов на одной челюсти всего за 1 день.</p>
+                            <div class="accordion-content">
+                                <p class="text-gray-600 mt-4 text-sm" data-lang-key="service1_desc">Это революционная методика, позволяющая установить полный несъемный протез на 4 или 6 имплантах. Идеальное решение при полном отсутствии зубов, позволяющее вернуть способность жевать и улыбаться без промедления.</p>
+                            </div>
+                            <button class="accordion-header text-brand-green font-bold mt-6 flex items-center gap-2">
+                                <span data-lang-key="details_button">Подробнее</span>
+                                <svg class="accordion-icon w-4 h-4 transition-transform duration-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Услуга 2 -->
+                    <div class="accordion-item rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 reveal bg-white">
+                        <div class="h-64 bg-cover bg-center" style="background-image: url('https://github.com/abdukhalilov13/verdent/blob/main/vvv.png?raw=true')"></div>
+                        <div class="p-8">
+                            <h3 class="font-heading text-3xl font-bold text-brand-dark" data-lang-key="service2_title">Эстетические виниры</h3>
+                            <p class="text-gray-600 mt-2" data-lang-key="service2_subtitle">Создание голливудской улыбки без боли и обточки зубов.</p>
+                             <div class="accordion-content">
+                                <p class="text-gray-600 mt-4 text-sm" data-lang-key="service2_desc">Керамические виниры E-max — это тончайшие накладки, которые позволяют изменить цвет, форму и положение зубов, создавая безупречный эстетический результат. Мы используем цифровой дизайн, чтобы вы могли "примерить" улыбку еще до начала процедур.</p>
+                            </div>
+                            <button class="accordion-header text-brand-green font-bold mt-6 flex items-center gap-2">
+                                <span data-lang-key="details_button_2">Подробнее</span>
+                                <svg class="accordion-icon w-4 h-4 transition-transform duration-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- BLOCK 4: TECHNOLOGIES -->
+        <section id="tech" class="py-20 lg:py-32 bg-brand-green text-white">
+            <div class="container mx-auto px-6">
+                 <div class="text-center mb-16">
+                    <h2 class="font-heading text-black md:text-5xl font-bold reveal" data-lang-key="tech_title">Технологии, которым мы доверяем</h2>
+                    <p class="text-lg text-black mt-4 max-w-2xl mx-auto reveal" data-lang-key="tech_subtitle">Точность и предсказуемый результат — основа нашей работы.</p>
+                </div>
+                <div class="relative max-w-4xl mx-auto reveal">
+                    <div id="tech-slider" class="relative h-96 overflow-hidden rounded-lg shadow-2xl">
+                        <!-- Слайд 1 -->
+                        <div class="tech-slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-100">
+                            <img src="https://images.pexels.com/photos/8942037/pexels-photo-8942037.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" class="w-full h-full object-cover" alt="Современный 3D-томограф в клинике Verdent">
+                            <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                                <h3 class="font-heading text-2xl font-bold" data-lang-key="tech1_title">3D-Компьютерный томограф</h3>
+                                <p class="mt-2 text-gray-200" data-lang-key="tech1_desc">Видим то, что скрыто. 100% точность диагностики и планирования имплантации.</p>
+                            </div>
+                        </div>
+                        <!-- Слайд 2 -->
+                        <div class="tech-slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0">
+                            <img src="https://github.com/abdukhalilov13/verdent/blob/main/ulibka.png?raw=true" class="w-full h-full object-cover" alt="Врач использует интраоральный 3D-сканер">
+                             <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                                <h3 class="font-heading text-2xl font-bold" data-lang-key="tech2_title">Интраоральный 3D-сканер</h3>
+                                <p class="mt-2 text-gray-200" data-lang-key="tech2_desc">Цифровые слепки без дискомфорта. Максимальная точность для протезирования и виниров.</p>
+                            </div>
+                        </div>
+                        <!-- Слайд 3 -->
+                         <div class="tech-slide absolute inset-0 transition-opacity duration-700 ease-in-out opacity-0">
+                            <img src="https://github.com/abdukhalilov13/verdent/blob/main/cad.jpg?raw=true" class="w-full h-full object-cover" alt="CAD/CAM система для изготовления коронок">
+                             <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
+                                <h3 class="font-heading text-2xl font-bold" data-lang-key="tech3_title">CAD/CAM система</h3>
+                                <p class="mt-2 text-gray-200" data-lang-key="tech3_desc">Изготовление коронок и виниров с ювелирной точностью в кратчайшие сроки.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Кнопки навигации слайдера -->
+                    <button id="tech-prev" class="absolute top-1/2 -left-4 md:-left-16 transform -translate-y-1/2 bg-white/20 p-3 rounded-full hover:bg-white/40 transition-colors z-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <button id="tech-next" class="absolute top-1/2 -right-4 md:-right-16 transform -translate-y-1/2 bg-white/20 p-3 rounded-full hover:bg-white/40 transition-colors z-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- BLOCK 6: TEAM -->
+       <section id="team" class="py-20 lg:py-32 bg-white">
+            <div class="container mx-auto px-4">
+                <div class="text-center mb-12">
+                    <h2 class="font-heading text-4xl md:text-5xl font-bold text-brand-dark reveal" data-lang-key="team_title">Наш специалист</h2>
+                    <p class="text-lg text-gray-600 mt-2 reveal" data-lang-key="team_subtitle">Человек, который создает ваши идеальные улыбки.</p>
+                </div>
+                <div class="flex flex-wrap justify-center gap-8">
+                    <div class="text-center group max-w-sm reveal" style="perspective: 1000px;">
+                        <div class="relative mb-6 overflow-hidden rounded-lg shadow-xl transition-all duration-300 group-hover:shadow-2xl">
+                            <img src="https://github.com/abdukhalilov13/verdent/blob/main/images/11111.jpg?raw=true" alt="Фотография доктора Элдора Восилова" class="h-auto w-full object-cover transition-all duration-500 group-hover:scale-110">
+                        </div>
+                        <h3 class="font-heading text-2xl font-bold">Доктор Элдор Восилов</h3>
+                        <p class="text-brand-gold">Главный врач, хирург-имплантолог</p>
+                        <button class="open-doctor-modal-btn mt-4 text-brand-green font-bold hover:underline"
+                            data-name="Д-р. Элдор Восилов"
+                            data-specialty="Главный врач, хирург-имплантолог"
+                            data-photo="https://github.com/abdukhalilov13/verdent/blob/main/images/11111.jpg?raw=true"
+                            data-bio="Ведущий специалист клиники с 15-летним опытом в области дентальной имплантации и костной пластики. Провел более 1200 успешных операций. Специализируется на самых сложных случаях, включая полную реабилитацию по протоколам All-on-4 и All-on-6."
+                            data-education="• Ташкентский Государственный Стоматологический Институт<br>• Ординатура по челюстно-лицевой хирургии, МГМСУ им. А.И. Евдокимова<br>• Курсы повышения квалификации в Германии и Южной Корее">
+                            Подробнее →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+            
+        <!-- BLOCK: LICENSES -->
+        <section id="licenses" class="py-20 lg:py-32 bg-brand-light-gray">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="font-heading text-4xl md:text-5xl font-bold text-brand-dark reveal" data-lang-key="licenses_title">Лицензии и сертификаты</h2>
+                    <p class="text-lg text-gray-600 mt-4 max-w-2xl mx-auto reveal" data-lang-key="licenses_subtitle">Наша деятельность полностью официальна, а квалификация врачей подтверждена.</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <div class="reveal">
+                        <img src="https://github.com/abdukhalilov13/verdent/blob/main/images/88.jpg?raw=true" alt="Лицензия клиники Verdent" class="rounded-lg shadow-lg cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 license-image">
+                    </div>
+                    <div class="reveal">
+                        <img src="https://github.com/abdukhalilov13/verdent/blob/main/images/44.jpg?raw=true" alt="Сертификат доктора Восилова" class="rounded-lg shadow-lg cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 license-image">
+                    </div>
+                    <div class="reveal">
+                        <img src="https://github.com/abdukhalilov13/verdent/blob/main/images/55.jpg?raw=true" alt="Сертификат о прохождении курса по имплантации" class="rounded-lg shadow-lg cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 license-image">
+                    </div>
+                    <div class="reveal">
+                        <img src="https://github.com/abdukhalilov13/verdent/blob/main/images/66.jpg?raw=true" alt="Сертификат о прохождении курса по протезированию" class="rounded-lg shadow-lg cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 license-image">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BLOCK: TELEGRAM FORM -->
+        <section id="telegram-form-section" class="py-20 lg:py-32 bg-brand-green text-white">
+            <div class="container mx-auto px-6 text-center">
+                <h2 class="font-heading text-4xl md:text-5xl font-bold reveal" data-lang-key="telegram_title">Получите индивидуальный план консультации</h2>
+                <p class="text-lg text-gray-300 mt-4 max-w-2xl mx-auto reveal" data-lang-key="telegram_subtitle">Заполните форму, и мы пришлем вам предварительный план и стоимость возможных вариантов лечения прямо в Telegram.</p>
+                <form id="telegram-form" class="max-w-xl mx-auto mt-10 text-left reveal">
+                    <div id="telegram-form-fields">
+                        <div class="grid sm:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label for="tg-name" class="block text-sm font-medium text-gray-300 mb-1" data-lang-key="form_name">Ваше имя</label>
+                                <input type="text" id="tg-name" placeholder="Иван" class="w-full p-3 bg-white/10 border-white/20 border rounded-lg focus:ring-2 focus:ring-brand-mint transition">
+                            </div>
+                            <div>
+                                <label for="tg-phone" class="block text-sm font-medium text-gray-300 mb-1" data-lang-key="form_phone">Ваш телефон</label>
+                                <input type="tel" id="tg-phone" placeholder="+998 XX XXX-XX-XX" class="w-full p-3 bg-white/10 border-white/20 border rounded-lg focus:ring-2 focus:ring-brand-mint transition">
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="tg-problem" class="block text-sm font-medium text-gray-300 mb-1" data-lang-key="form_problem">Опишите вашу проблему</oпишите>
+                            <textarea id="tg-problem" rows="4" placeholder="Например: Отсутствует несколько зубов сверху..." class="w-full p-3 bg-white/10 border-white/20 border rounded-lg focus:ring-2 focus:ring-brand-mint transition"></textarea>
+                        </div>
+                      <button type="submit" id="telegram-submit-btn" class="w-full bg-brand-mint text-black font-bold py-4 px-10 rounded-full text-lg hover:bg-white transition-colors transform hover:scale-105 flex items-center justify-center gap-3 shadow-lg">
+    <span data-lang-key="form_button">Получить план в Telegram</span>
+</button>
+
+                    </div>
+                    <div id="telegram-success-message" class="hidden text-center bg-white/10 p-8 rounded-lg">
+                        <h3 class="font-heading text-2xl font-bold text-brand-mint mb-4" data-lang-key="telegram_success_title">Спасибо!</h3>
+                        <p class="text-gray-200" data-lang-key="telegram_success_desc">Ваша заявка отправлена. Мы скоро свяжемся с вами в Telegram.</p>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- BLOCK 8: FAQ -->
+        <section id="faq" class="py-20 lg:py-32 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="font-heading text-4xl md:text-5xl font-bold text-brand-dark reveal" data-lang-key="faq_title">Частые вопросы</h2>
+                    <p class="text-lg text-gray-600 mt-4 max-w-2xl mx-auto reveal" data-lang-key="faq_subtitle">Отвечаем на то, что вас волнует больше всего.</p>
+                </div>
+                <div id="faq-accordion-container" class="max-w-3xl mx-auto space-y-4 reveal">
+                    <!-- Вопрос 1 -->
+                    <div class="accordion-item bg-brand-light-gray rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left py-5 px-6 flex justify-between items-center">
+                            <span class="font-heading text-xl text-brand-dark" data-lang-key="faq1_q">Больно ли ставить импланты?</span>
+                            <svg class="accordion-icon w-6 h-6 text-brand-gold transition-transform duration-500 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-6 pt-0 text-gray-600">
+                                <p data-lang-key="faq1_a">Нет. Вся процедура проходит под современной и эффективной анестезией. Вы не почувствуете боли. После операции врач выпишет необходимые обезболивающие препараты для максимального комфорта.</p>
+                            </div>
+                        </div>
+                    </div>
+                      <div class="accordion-item bg-brand-light-gray rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left py-5 px-6 flex justify-between items-center">
+                            <span class="font-heading text-xl text-brand-dark" data-lang-key="faq1_q">Как часто нужно проходить профессиональную чистку зубов?</span>
+                            <svg class="accordion-icon w-6 h-6 text-brand-gold transition-transform duration-500 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-6 pt-0 text-gray-600">
+                                <p data-lang-key="faq1_a">Рекомендуется посещать стоматолога на гигиеническую чистку каждые 6–12 месяцев. Это помогает удалить зубной камень и биоплёнку, предотвратить кариес и заболевания дёсен, а также сохранить здоровье полости рта на долгие годы.</p>
+                            </div>
+                        </div>
+                    </div>
+                      <div class="accordion-item bg-brand-light-gray rounded-lg shadow-sm">
+                        <button class="accordion-header w-full text-left py-5 px-6 flex justify-between items-center">
+                            <span class="font-heading text-xl text-brand-dark" data-lang-key="faq1_q">Больно ли удалять зуб мудрости?</span>
+                            <svg class="accordion-icon w-6 h-6 text-brand-gold transition-transform duration-500 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        </button>
+                        <div class="accordion-content">
+                            <div class="p-6 pt-0 text-gray-600">
+                                <p data-lang-key="faq1_a">Процедура удаления зуба мудрости проводится под обезболиванием — местной или даже седацией, если нужно. Вы ничего не почувствуете. После операции врач назначит обезболивающие средства, чтобы вы чувствовали себя комфортно.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Добавьте другие вопросы по аналогии -->
+                </div>
+            </div>
+        </section>
+
+        <!-- BLOCK 7: CONTACTS -->
+        <section id="contact" class="py-20 lg:py-32 bg-brand-light-gray">
+            <div class="container mx-auto px-6">
+                <div class="grid lg:grid-cols-2 gap-16 items-start">
+                    <div class="reveal">
+                        <h2 class="font-heading text-4xl md:text-5xl font-bold text-brand-dark mb-4" data-lang-key="contact_title">Запишитесь на прием</h2>
+                        <p class="text-lg text-gray-600 mb-8" data-lang-key="contact_subtitle">Сделайте первый шаг к здоровой и красивой улыбке. Заполните форму, и наш администратор свяжется с вами для подтверждения.</p>
+                        <div id="contact-form-wrapper">
+                            <form id="contact-form" class="space-y-4">
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    <input type="text" name="name" placeholder="Ваше имя" class="w-full p-4 bg-white border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-gold transition" required>
+                                    <input type="tel" name="phone" placeholder="Ваш номер телефона" class="w-full p-4 bg-white border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-gold transition" required>
+                                </div>
+                                <select name="service" class="custom-select w-full p-4 bg-white border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-gold transition" required>
+                                    <option value="" disabled selected>Выберите услугу</option>
+                                    <option value="Имплантация All-on-4/6">Имплантация All-on-4/6</option>
+                                    <option value="Эстетические виниры">Эстетические виниры</option>
+                                    <option value="Консультация">Первичная консультация</option>
+                                    <option value="Другое">Другое</option>
+                                </select>
+                                 <select name="doctor" class="custom-select w-full p-4 bg-white border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-gold transition">
+                                    <option value="Любой" selected>Выберите врача (необязательно)</option>
+                                </select>
+                                <input type="date" name="date" class="w-full p-4 bg-white border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-gold transition" required>
+                                <div class="pt-2">
+                                    <label class="flex items-center text-sm text-gray-500">
+                                        <input type="checkbox" class="h-4 w-4 text-brand-green rounded border-gray-300 focus:ring-brand-gold" required>
+                                        <span class="ml-2">Я согласен на <a href="#" class="underline">обработку персональных данных</a></span>
+                                    </label>
+                                </div>
+                               <button type="submit" class="w-full bg-brand-green text-black font-bold py-4 px-10 rounded-full text-lg hover:bg-brand-dark transition-colors transform hover:scale-105 shadow-lg">Отправить заявку</button>
+                            </form>
+                        </div>
+                        <div id="contact-success-message" class="hidden text-center bg-white p-8 rounded-lg shadow-md">
+                            <h3 class="font-heading text-2xl font-bold text-brand-green mb-4">Спасибо!</h3>
+                            <p class="text-gray-600">Ваша заявка успешно отправлена. Наш администратор свяжется с вами в ближайшее время для подтверждения записи.</p>
+                        </div>
+                    </div>
+                    <div class="reveal">
+                        <div class="bg-white p-8 rounded-lg shadow-md">
+                            <h3 class="font-heading text-2xl font-bold mb-6" data-lang-key="contacts_title">Наши контакты</h3>
+                            <div class="space-y-4 text-gray-700">
+                                <p><strong data-lang-key="contacts_address">Адрес:</strong> г. Фергана, Алишер Навои 44</p>
+                                <p><strong data-lang-key="contacts_phone">Телефон:</strong> <a href="tel:+998883031100" class="text-brand-green hover:underline">+998 (88) 303-11-00</a></p>
+                                <p><strong>Email:</strong> <a href="mailto:info@verdent.uz" class="text-brand-green hover:underline">ramell@mail.ru</a></p>
+                                <p><strong data-lang-key="contacts_hours">Часы работы:</strong> Пн - Сб, 9:00 – 20:00</p>
+                            </div>
+                        </div>
+                        <div class="mt-8 rounded-lg overflow-hidden h-64 shadow-lg">
+                           <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3039.562143989804!2d71.785178!3d40.3742321!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x38bb85061677337d%3A0x93e64e102b1c8058!2z0KHRgtC-0LzQsNGC0L7Qu9C-0LPQuNGPICJWRVJERU5UIg!5e0!3m2!1sru!2s!4v1753548476195!5m2!1sru!2s" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>  
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-brand-dark text-gray-400 py-12">
+        <div class="container mx-auto px-6 text-center">
+            <p data-lang-key="footer_copyright">&copy; 2024 Стоматологический центр "Verdent". Все права защищены.</p>
+            <p class="text-sm mt-2" data-lang-key="footer_disclaimer">Информация на сайте не является публичной офертой.</p>
+        </div>
+    </footer>
+
+    <!-- DOCTOR PROFILE MODAL -->
+    <div id="doctor-modal" class="modal-overlay">
+        <div class="modal-content modal-content-lg relative">
+            <button id="close-doctor-modal-btn" class="absolute top-4 right-6 text-gray-400 hover:text-gray-800 text-3xl z-10">&times;</button>
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div>
+                    <img id="doctor-modal-photo" src="" alt="Фотография врача" class="rounded-lg shadow-lg w-full">
+                </div>
+                <div>
+                    <h3 id="doctor-modal-name" class="font-heading text-3xl font-bold text-brand-dark"></h3>
+                    <p id="doctor-modal-specialty" class="text-brand-gold mb-4"></p>
+                    <p id="doctor-modal-bio" class="text-gray-600 mb-6"></p>
+                    <h4 class="font-bold text-brand-dark mb-2">Образование и курсы:</h4>
+                    <div id="doctor-modal-education" class="text-gray-600 text-sm"></div>
+                    <a href="#contact" id="book-doctor-btn" class="mt-8 inline-block w-full text-center bg-brand-green text-white font-bold py-3 px-6 rounded-full hover:bg-brand-dark transition-colors">Записаться к этому врачу</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LICENSE IMAGE MODAL -->
+    <div id="license-modal" class="modal-overlay">
+        <div class="modal-content modal-content-lg relative p-2 bg-transparent shadow-none">
+            <button id="close-license-modal-btn" class="absolute -top-4 -right-4 text-white bg-black/50 rounded-full w-10 h-10 flex items-center justify-center text-2xl z-10">&times;</button>
+            <img id="license-modal-img" src="" alt="Увеличенное изображение лицензии или сертификата" class="w-full h-auto rounded-md">
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // --- Глобальные данные ---
+        const siteData = {
+            doctors: [
+                { 
+                    id: 'vosilov',
+                    name: 'Д-р. Элдор Восилов', 
+                    specialty: 'Главный врач, хирург-имплантолог',
+                    photo: 'https://github.com/abdukhalilov13/verdent/blob/main/images/11111.jpg?raw=true',
+                    bio: 'Ведущий специалист клиники с 15-летним опытом в области дентальной имплантации и костной пластики. Провел более 1200 успешных операций. Специализируется на самых сложных случаях, включая полную реабилитацию по протоколам All-on-4 и All-on-6.',
+                    education: '• Ташкентский Государственный Стоматологический Институт<br>• Ординатура по челюстно-лицевой хирургии, МГМСУ им. А.И. Евдокимова<br>• Курсы повышения квалификации в Германии и Южной Корее'
+                },
+                // Сюда можно добавлять новых врачей
+            ],
+            translations: {
+                ru: {
+                    // Nav
+                    nav_approach: "Подход", nav_services: "Услуги", nav_doctors: "Врачи", nav_licenses: "Лицензии", nav_faq: "Вопросы", nav_appointment: "Запись",
+                    nav_approach_mob: "Подход", nav_services_mob: "Услуги", nav_doctors_mob: "Врачи", nav_licenses_mob: "Лицензии", nav_faq_mob: "Вопросы", nav_appointment_mob: "Запись на прием",
+                    // Hero
+                    hero_title: "Естественность. Технологии. Улыбка.", hero_subtitle: "Современная имплантация и протезирование в Фергане. Возвращаем то, что дано природой.", hero_button: "Записаться на консультацию",
+                    // Stats
+                    stats_experience: "Лет успешной практики", stats_implants: "Установленных имплантов", stats_success_rate: "% Приживаемости", stats_patients: "Счастливых пациентов",
+                    // Approach
+                    approach_title: "Наш подход – ваша уверенность", approach_subtitle: "Мы превратили сложное лечение в понятный и предсказуемый процесс.",
+                    approach_step1_title: "Диагностика", approach_step1_desc: "Точный 3D-снимок и цифровое сканирование для создания полной картины.",
+                    approach_step2_title: "Планирование", approach_step2_desc: "Моделируем вашу будущую улыбку в программе, чтобы вы увидели результат до начала лечения.",
+                    approach_step3_title: "Лечение", approach_step3_desc: "Бережная имплантация и протезирование по цифровому шаблону. Без боли и стресса.",
+                    approach_step4_title: "Результат", approach_step4_desc: "Идеальная улыбка, которая выглядит и ощущается как ваша собственная. На всю жизнь.",
+                    // Services
+                    services_title: "Наши услуги", services_subtitle: "Сосредоточены на том, что умеем делать лучше всего.",
+                    service1_title: "Имплантация All-on-4/6", service1_subtitle: "Восстановление всех зубов на одной челюсти всего за 1 день.", service1_desc: "Это революционная методика, позволяющая установить полный несъемный протез на 4 или 6 имплантах. Идеальное решение при полном отсутствии зубов, позволяющее вернуть способность жевать и улыбаться без промедления.",
+                    service2_title: "Эстетические виниры", service2_subtitle: "Создание голливудской улыбки без боли и обточки зубов.", service2_desc: "Керамические виниры E-max — это тончайшие накладки, которые позволяют изменить цвет, форму и положение зубов, создавая безупречный эстетический результат. Мы используем цифровой дизайн, чтобы вы могли \"примерить\" улыбку еще до начала процедур.",
+                    details_button: "Подробнее", details_button_2: "Подробнее",
+                    // Tech
+                    tech_title: "Технологии, которым мы доверяем", tech_subtitle: "Точность и предсказуемый результат — основа нашей работы.",
+                    tech1_title: "3D-Компьютерный томограф", tech1_desc: "Видим то, что скрыто. 100% точность диагностики и планирования имплантации.",
+                    tech2_title: "Интраоральный 3D-сканер", tech2_desc: "Цифровые слепки без дискомфорта. Максимальная точность для протезирования и виниров.",
+                    tech3_title: "CAD/CAM система", tech3_desc: "Изготовление коронок и виниров с ювелирной точностью в кратчайшие сроки.",
+                    // Team
+                    team_title: "Наш специалист", team_subtitle: "Человек, который создает ваши идеальные улыбки.",
+                    // Licenses
+                    licenses_title: "Лицензии и сертификаты", licenses_subtitle: "Наша деятельность полностью официальна, а квалификация врачей подтверждена.",
+                    // Telegram Form
+                    telegram_title: "Получите индивидуальный план консультации", telegram_subtitle: "Заполните форму, и мы пришлем вам предварительный план и стоимость возможных вариантов лечения прямо в Telegram.",
+                    form_name: "Ваше имя", form_phone: "Ваш телефон", form_problem: "Опишите вашу проблему", form_button: "Получить план в Telegram",
+                    telegram_success_title: "Спасибо!", telegram_success_desc: "Ваша заявка отправлена. Мы скоро свяжемся с вами в Telegram.",
+                    // FAQ
+                    faq_title: "Частые вопросы", faq_subtitle: "Отвечаем на то, что вас волнует больше всего.",
+                    faq1_q: "Больно ли ставить импланты?", faq1_a: "Нет. Вся процедура проходит под современной и эффективной анестезией. Вы не почувствуете боли. После операции врач выпишет необходимые обезболивающие препараты для максимального комфорта.",
+                    // Contacts
+                    contact_title: "Запишитесь на прием", contact_subtitle: "Сделайте первый шаг к здоровой и красивой улыбке. Заполните форму, и наш администратор свяжется с вами для подтверждения.",
+                    contacts_title: "Наши контакты", contacts_address: "Адрес:", contacts_phone: "Телефон:", contacts_hours: "Часы работы:",
+                    // Footer
+                    footer_copyright: "© 2024 Стоматологический центр \"Verdent\". Все права защищены.", footer_disclaimer: "Информация на сайте не является публичной офертой.",
+                },
+                uz: {
+                    // Навигация
+                    nav_approach: "Yondashuv", nav_services: "Xizmatlar", nav_doctors: "Shifokorlar", nav_licenses: "Litsenziyalar", nav_faq: "Savollar", nav_appointment: "Yozilish",
+                    nav_approach_mob: "Yondashuv", nav_services_mob: "Xizmatlar", nav_doctors_mob: "Shifokorlar", nav_licenses_mob: "Litsenziyalar", nav_faq_mob: "Savollar", nav_appointment_mob: "Qabulga yozilish",
+                    // Главный блок
+                    hero_title: "Tabiiylik. Texnologiya. Tabassum.", hero_subtitle: "Farg'onada zamonaviy implantatsiya va protezlash. Tabiat in'om etgan narsani qaytaramiz.", hero_button: "Maslahatga yozilish",
+                    // Статистика
+                    stats_experience: "Yillik muvaffaqiyatli tajriba", stats_implants: "O‘rnatilgan implantlar", stats_success_rate: "% O‘rnashish darajasi", stats_patients: "Baxtli bemorlar",
+                    // Наш подход
+                    approach_title: "Bizning yondashuvimiz – sizning ishonchingiz", approach_subtitle: "Biz murakkab davolashni tushunarli va bashoratli jarayonga aylantirdik.",
+                    approach_step1_title: "Diagnostika", approach_step1_desc: "To‘liq tasvirni yaratish uchun aniq 3D-surat va raqamli skanerlash.",
+                    approach_step2_title: "Rejalashtirish", approach_step2_desc: "Davolashni boshlashdan oldin natijani ko‘rishingiz uchun tabassumingizni dasturda modellashtiramiz.",
+                    approach_step3_title: "Davolash", approach_step3_desc: "Raqamli shablon asosida ehtiyotkorlik bilan implantatsiya va protezlash. Og‘riqsiz va stresssiz.",
+                    approach_step4_title: "Natija", approach_step4_desc: "Tabiiy ko‘rinishga ega mukammal tabassum. Umrbod natija.",
+                    // Услуги
+                    services_title: "Bizning xizmatlarimiz", services_subtitle: "Eng kuchli jihatlarimizga e'tibor qaratamiz.",
+                    service1_title: "All-on-4/6 implantatsiyasi", service1_subtitle: "Bir jag'dagi barcha tishlarni atigi 1 kunda tiklash.", service1_desc: "Bu usul 4 yoki 6 ta implantga to‘liq protez o‘rnatishni ta'minlaydi. Tishlar to‘liq yo‘q bo‘lganda eng yaxshi yechim.",
+                    service2_title: "Estetik vinirlar", service2_subtitle: "Tishlarni silliqlamasdan go‘zal tabassum yaratish.", service2_desc: "E-max keramik vinirlari — bu yupqa qoplamalar bo‘lib, ular tishlarning rangini, shaklini va joylashuvini o‘zgartiradi. Raqamli dizayn orqali natijani oldindan ko‘rish mumkin.",
+                    details_button: "Batafsil", details_button_2: "Batafsil",
+                    // Технологии
+                    tech_title: "Biz ishonadigan texnologiyalar", tech_subtitle: "Aniqlik va prognozlangan natija — bizning asosimiz.",
+                    tech1_title: "3D Kompyuter tomografi", tech1_desc: "Yashirin muammolarni aniqlash. 100% aniqlik bilan diagnostika.",
+                    tech2_title: "Intraoral 3D skaner", tech2_desc: "Noqulayliksiz raqamli tish shakllari. Vinir va protezlash uchun maksimal aniqlik.",
+                    tech3_title: "CAD/CAM tizimi", tech3_desc: "Eng qisqa muddatda tish qoplamalarini zargarlik aniqligi bilan tayyorlash.",
+                    // Команда
+                    team_title: "Bizning mutaxassislar", team_subtitle: "Sizning tabassumingiz ortida turgan insonlar.",
+                    // Лицензии
+                    licenses_title: "Litsenziyalar va sertifikatlar", licenses_subtitle: "Bizning faoliyatimiz rasmiy va shifokorlarimiz malakasi tasdiqlangan.",
+                    // Форма Telegram
+                    telegram_title: "Shaxsiy maslahat rejasini oling", telegram_subtitle: "Shaklni to‘ldiring va biz sizga Telegram orqali davolanish rejasini va taxminiy narxni yuboramiz.",
+                    form_name: "Ismingiz", form_phone: "Telefon raqamingiz", form_problem: "Muammoingizni yozing", form_button: "Rejani Telegram’da olish",
+                    telegram_success_title: "Rahmat!", telegram_success_desc: "Arizangiz yuborildi. Tez orada siz bilan Telegram orqali bog‘lanamiz.",
+                    // Вопрос-ответ
+                    faq_title: "Ko‘p so‘raladigan savollar", faq_subtitle: "Eng ko‘p qiziqtirgan savollarga javob beramiz.",
+                    faq1_q: "Implant qo‘yish og‘riqlimi?", faq1_a: "Yo‘q. Butun jarayon zamonaviy og‘riqsizlantirish bilan amalga oshiriladi. Jarayondan so‘ng shifokor zarur dori vositalarini yozib beradi.",
+                    // Контакты
+                    contact_title: "Qabulga yoziling", contact_subtitle: "Sog‘lom va chiroyli tabassum sari ilk qadam qo‘ying. Shaklni to‘ldiring, operatorimiz siz bilan bog‘lanadi.",
+                    contacts_title: "Bizning kontaktlar", contacts_address: "Manzil:", contacts_phone: "Telefon:", contacts_hours: "Ish vaqti:",
+                    // Подвал
+                    footer_copyright: "© 2024 Verdent stomatologiya markazi. Barcha huquqlar himoyalangan.", footer_disclaimer: "Saytdagi ma'lumotlar ommaviy oferta emas."
+                }
+            }
+        };
+
+        // --- Вспомогательные функции ---
+
+        /**
+         * Показывает кастомное уведомление
+         * @param {string} message - Текст сообщения
+         * @param {string} type - 'error' или 'success'
+         */
+        function showNotification(message, type = 'error') {
+            const container = document.getElementById('notification-container');
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            container.appendChild(notification);
+            
+            setTimeout(() => notification.classList.add('show'), 10);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 500);
+            }, 5000);
+        }
+
+        // --- Функции инициализации ---
+
+        function initLanguageSwitcher() {
+            const langSwitcher = document.getElementById('lang-switcher');
+            if (!langSwitcher) return;
+            const langBtns = langSwitcher.querySelectorAll('.lang-btn');
+
+            function switchLanguage(lang) {
+                const elements = document.querySelectorAll('[data-lang-key]');
+                elements.forEach(el => {
+                    const key = el.dataset.langKey;
+                    if (siteData.translations[lang] && siteData.translations[lang][key]) {
+                        el.innerText = siteData.translations[lang][key];
+                    }
+                });
+                langBtns.forEach(btn => {
+                    btn.classList.toggle('font-bold', btn.dataset.lang === lang);
+                    btn.classList.toggle('text-gray-400', btn.dataset.lang !== lang);
+                });
+            }
+
+            langBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => switchLanguage(e.target.dataset.lang));
+            });
+        }
+
+        function initScrollAnimations() {
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+        }
+
+        function initStatCounters() {
+            const statsObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const el = entry.target;
+                        const target = +el.dataset.statTarget;
+                        let current = 0;
+                        const duration = 2000;
+                        const stepTime = Math.max(1, Math.floor(duration / target));
+                        
+                        const timer = setInterval(() => {
+                            current += Math.ceil(target / (duration / stepTime));
+                            if (current >= target) {
+                                el.innerText = target;
+                                clearInterval(timer);
+                            } else {
+                                el.innerText = current;
+                            }
+                        }, stepTime);
+                        observer.unobserve(el);
+                    }
+                });
+            }, { threshold: 0.8 });
+            document.querySelectorAll('[data-stat-target]').forEach(el => statsObserver.observe(el));
+        }
+
+        function initAccordions() {
+            document.querySelectorAll('.accordion-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    const item = header.closest('.accordion-item');
+                    const content = item.querySelector('.accordion-content');
+                    const icon = item.querySelector('.accordion-icon');
+                    
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        if(icon) icon.classList.remove('rotate-180', 'rotate-45');
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        if(icon) {
+                            icon.classList.add(item.closest('#faq') ? 'rotate-45' : 'rotate-180');
+                        }
+                    }
+                });
+            });
+        }
+
+        function initMobileMenu() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if(!mobileMenuButton || !mobileMenu) return;
+
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            mobileMenu.querySelectorAll('a').forEach(anchor => {
+                anchor.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+            });
+        }
+
+        function initHeaderScroll() {
+            const header = document.getElementById('header');
+            if(!header) return;
+            window.addEventListener('scroll', () => {
+                header.classList.toggle('shadow-lg', window.scrollY > 50);
+            });
+        }
+
+        function initTechSlider() {
+            const techSlider = document.getElementById('tech-slider');
+            if (!techSlider) return;
+            
+            const slides = techSlider.querySelectorAll('.tech-slide');
+            const prevBtn = document.getElementById('tech-prev');
+            const nextBtn = document.getElementById('tech-next');
+            let currentSlide = 0;
+            let slideInterval;
+
+            function showSlide(n) {
+                slides.forEach((slide, index) => {
+                    slide.style.opacity = (index === n) ? '1' : '0';
+                });
+            }
+            
+            function changeSlide(direction) {
+                currentSlide = (currentSlide + direction + slides.length) % slides.length;
+                showSlide(currentSlide);
+                resetInterval();
+            }
+
+            function resetInterval() {
+                clearInterval(slideInterval);
+                slideInterval = setInterval(() => changeSlide(1), 5000);
+            }
+
+            nextBtn.addEventListener('click', () => changeSlide(1));
+            prevBtn.addEventListener('click', () => changeSlide(-1));
+            
+            resetInterval();
+        }
+
+        function initModals() {
+            // Doctor Modal
+            const doctorModal = document.getElementById('doctor-modal');
+            const openDoctorModalBtns = document.querySelectorAll('.open-doctor-modal-btn');
+            const closeDoctorModalBtn = document.getElementById('close-doctor-modal-btn');
+            const bookDoctorBtn = document.getElementById('book-doctor-btn');
+
+            openDoctorModalBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('doctor-modal-name').textContent = btn.dataset.name;
+                    document.getElementById('doctor-modal-specialty').textContent = btn.dataset.specialty;
+                    document.getElementById('doctor-modal-photo').src = btn.dataset.photo;
+                    document.getElementById('doctor-modal-bio').textContent = btn.dataset.bio;
+                    document.getElementById('doctor-modal-education').innerHTML = btn.dataset.education;
+                    
+                    bookDoctorBtn.onclick = () => {
+                        doctorModal.classList.remove('active');
+                        document.querySelector('#contact select[name="doctor"]').value = btn.dataset.name;
+                        document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+                    };
+                    doctorModal.classList.add('active');
+                });
+            });
+
+            function closeDoctorModal() { doctorModal.classList.remove('active'); }
+            closeDoctorModalBtn.addEventListener('click', closeDoctorModal);
+            doctorModal.addEventListener('click', (e) => {
+                if (e.target === doctorModal) closeDoctorModal();
+            });
+
+            // License Modal
+            const licenseModal = document.getElementById('license-modal');
+            const licenseImages = document.querySelectorAll('.license-image');
+            const licenseModalImg = document.getElementById('license-modal-img');
+            const closeLicenseModalBtn = document.getElementById('close-license-modal-btn');
+
+            licenseImages.forEach(img => {
+                img.addEventListener('click', () => {
+                    licenseModalImg.src = img.src;
+                    licenseModal.classList.add('active');
+                });
+            });
+            
+            function closeLicenseModal() { licenseModal.classList.remove('active'); }
+            closeLicenseModalBtn.addEventListener('click', closeLicenseModal);
+            licenseModal.addEventListener('click', (e) => {
+                if (e.target === licenseModal) closeLicenseModal();
+            });
+        }
+
+        function initForms() {
+            // --- Динамическое заполнение списка врачей ---
+            const doctorSelect = document.querySelector('#contact select[name="doctor"]');
+            if(doctorSelect) {
+                siteData.doctors.forEach(doctor => {
+                    const option = document.createElement('option');
+                    option.value = doctor.name;
+                    option.textContent = doctor.name;
+                    doctorSelect.appendChild(option);
+                });
+            }
+
+            // --- Установка минимальной даты ---
+            const dateInput = document.querySelector('#contact input[type="date"]');
+            if(dateInput) {
+                dateInput.min = new Date().toISOString().split("T")[0];
+            }
+
+            // --- Обработка формы контактов ---
+            const contactForm = document.getElementById('contact-form');
+            if(contactForm) {
+                contactForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    document.getElementById('contact-form-wrapper').classList.add('hidden');
+                    document.getElementById('contact-success-message').classList.remove('hidden');
+                });
+            }
+            
+            // --- Обработка формы Telegram ---
+            const tgForm = document.getElementById('telegram-form');
+            if(tgForm) {
+                tgForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById('tg-name').value;
+                    const phone = document.getElementById('tg-phone').value;
+                    const problem = document.getElementById('tg-problem').value;
+
+                    if (!name || !phone || !problem) {
+                        showNotification('Пожалуйста, заполните все поля.');
+                        return;
+                    }
+
+                    const tgSubmitBtn = document.getElementById('telegram-submit-btn');
+                    const originalButtonContent = tgSubmitBtn.innerHTML;
+                    tgSubmitBtn.disabled = true;
+                    tgSubmitBtn.innerHTML = '<div class="loader dark"></div>';
+
+                    // --- ИМИТАЦИЯ ОТПРАВКИ ---
+                    // В реальном проекте здесь должен быть fetch-запрос на ваш сервер (бэкенд),
+                    // который безопасно отправит сообщение в Telegram.
+                    // Хранить токен бота в коде на сайте небезопасно!
+                    console.log("Имитация отправки данных в Telegram:", { name, phone, problem });
+                    
+                    setTimeout(() => {
+                        document.getElementById('telegram-form-fields').classList.add('hidden');
+                        document.getElementById('telegram-success-message').classList.remove('hidden');
+                        tgSubmitBtn.disabled = false;
+                        tgSubmitBtn.innerHTML = originalButtonContent;
+                    }, 1500); // Имитация задержки сети
+                });
+            }
+        }
+
+        // --- Запуск всех инициализаций ---
+        initLanguageSwitcher();
+        initScrollAnimations();
+        initStatCounters();
+        initAccordions();
+        initMobileMenu();
+        initHeaderScroll();
+        initTechSlider();
+        initModals();
+        initForms();
+    });
+    </script>
+</body>
+</html>
